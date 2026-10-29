@@ -3,7 +3,10 @@
 /* 独立页和主页内嵌共用这一段：把这套固定视口的界面收进一个 100vh 的区块里 */
 .song{
   position:relative;
+  /* 旧浏览器回退用 vh；支持 dvh 的浏览器用真实可见高度，
+     避免手机地址栏收起/展开时这一屏的高度对不上 */
   height:100vh;
+  height:100dvh;
   overflow:hidden;
   isolation:isolate;
   contain:layout paint style;
