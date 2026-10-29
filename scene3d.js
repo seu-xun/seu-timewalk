@@ -872,9 +872,14 @@
     let H = 1;
     let wide = true;
 
+    let lastW = 0, lastH = 0, rsTimer = 0;
     function resize() {
       const w = canvas.clientWidth || 1;
       const h = canvas.clientHeight || 1;
+      // 尺寸没变就直接退出：手机地址栏收缩时 resize 会连续触发，
+      // 每触发一次就重建 WebGL 画布，画面会闪
+      if (w === lastW && h === lastH) return;
+      lastW = w; lastH = h;
       W = w;
       H = h;
       wide = w / h > 1.05;
@@ -1015,8 +1020,12 @@
     }
 
     resize();
-    window.addEventListener('resize', resize);
-    if (window.ResizeObserver) new ResizeObserver(resize).observe(canvas);
+    function scheduleResize() {
+      clearTimeout(rsTimer);
+      rsTimer = setTimeout(resize, 120);
+    }
+    window.addEventListener('resize', scheduleResize);
+    if (window.ResizeObserver) new ResizeObserver(scheduleResize).observe(canvas);
 
     frame();
 

@@ -111,8 +111,12 @@
   let cx = 0, cy = 0, R = 0, R0 = 0, R1 = 0;
   let nodeR = [];   // 抉择圈的实际半径（带最小间距）
 
+  let lastWrapW = 0, lastWrapH = 0, wrapTimer = 0;
   function resize() {
     const wrap = canvas.parentElement;
+    if (wrap.clientWidth === lastWrapW && wrap.clientHeight === lastWrapH) return;
+    lastWrapW = wrap.clientWidth;
+    lastWrapH = wrap.clientHeight;
     const size = Math.min(wrap.clientWidth * 0.94, wrap.clientHeight * 0.94, 1080);
     DPR = Math.min(window.devicePixelRatio || 1, 1.5);
     W = size; H = size;
@@ -935,7 +939,9 @@
   }
 
   window.addEventListener('resize', function () {
-    if (current) layoutStack();
+    if (!current) return;
+    clearTimeout(wrapTimer);
+    wrapTimer = setTimeout(layoutStack, 120);
   });
 
   /* ---------- 阶段切换 ---------- */
@@ -1229,7 +1235,8 @@
 
   window.addEventListener('resize', function () {
     if (!ringview.classList.contains('on')) return;
-    resize();
+    clearTimeout(wrapTimer);
+    wrapTimer = setTimeout(resize, 120);
   });
 
   // 预热画布尺寸（首屏期间先算好，避免进入时闪一下）
