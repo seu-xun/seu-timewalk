@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>六朝松的年轮 · 东南大学</title>
+<link rel="stylesheet" href="song.css" />
+<style>html,body{margin:0;height:100%;overflow:hidden;background:#0b0806}</style>
+</head>
+<body>
+
+<section class="song" id="song">
+<!-- ============================ A 首屏 ============================ -->
+<section id="intro">
+  <div class="seam" aria-hidden="true"></div>
+  <div class="intro-grid">
+    <div class="intro-copy">
+      <p class="eyebrow">四牌楼 · 六朝松</p>
+      <h1>六朝松的年轮：<br /><em>一所大学的选择时刻</em></h1>
+      <p class="sub">触摸年轮，在东南大学的关键节点做一次判断——树会记住你的选择。</p>
+      <button class="cta" id="enter"><span class="dot"></span>触摸年轮</button>
+    </div>
+
+    <div class="plate">
+      <div class="screen" id="screen">
+        <figure class="panel" style="--w:238;--h:362">
+          <span class="frame"><img src="img/plate-a.webp" alt="六朝松线描版画" /></span>
+          <figcaption>版　画</figcaption>
+        </figure>
+        <figure class="panel" style="--w:258;--h:402">
+          <span class="frame"><img src="img/plate-b.webp" alt="六朝松历史旧影" /></span>
+          <figcaption>旧　影</figcaption>
+        </figure>
+        <figure class="panel" style="--w:234;--h:322">
+          <span class="frame"><img src="img/plate-c.webp" alt="六朝松今日实景" /></span>
+          <figcaption>今　日</figcaption>
+        </figure>
+      </div>
+      <p class="plate-note">六朝松是东南大学的<b>精神图腾</b>，位于校园西北，相传为六朝遗株，为金陵城古树之至古。据著名林学家马大浦、黄保龙鉴定，其学名为“<b>桧柏</b>”，树龄已<b>逾千年</b>。“古堞烟埋宫井树，陈主吴姬堕泉处”，六朝宫苑，今已不复找寻，唯此青松历经千余年，栉风沐雨，仍霜干虬枝，纷披偃盖，<b>饶有生意</b>。六朝松见证了六朝宫苑的繁华疏落，见证了《昭明文选》的成书、《永乐大典》的编纂，更见证了学校辉煌灿烂的百年办学历程。</p>
+    </div>
+  </div>
+  <a class="skip" href="#" id="skip">跳过互动，直接看年表</a>
+</section>
+
+
+<!-- ============================ B 年轮主视图 ============================ -->
+<section id="ringview">
+  <div class="topbar">
+    <span class="tb-left">
+      <button class="back-intro" id="backIntro" type="button">← 回到开头</button>
+      <span>六朝松 · 年轮</span>
+    </span>
+    <span class="song-progress">已抉择 <b id="done">0</b> / 4</span>
+  </div>
+
+  <div class="disc-wrap">
+    <canvas id="disc"></canvas>
+  </div>
+
+  <div class="caption" id="caption">
+    <div class="yr" id="capYear"></div>
+    <div class="q" id="capQ"></div>
+    <div class="hint" id="capHint"></div>
+  </div>
+
+  <div class="ground" id="ground"></div>
+  <div class="yearmark" id="yearmark"></div>
+
+
+  <button class="chrono-btn" id="chronoBtn" type="button">校史简表</button>
+
+  <button class="remember" id="remember" disabled>
+    六朝松记得 <span class="n" id="memCount">0</span>
+  </button>
+</section>
+
+<!-- ============================ 辅助年表 ============================ -->
+<section class="chrono" id="chrono">
+  <div class="chrono-sheet">
+    <div class="chrono-head">
+      <h3>校史简表</h3>
+      <span class="sub">1902 — NOW</span>
+      <button class="chrono-close" id="chronoClose" type="button" aria-label="关闭">×</button>
+    </div>
+    <div class="chrono-list" id="chronoList"></div>
+    <p class="chrono-note">完整校史以校史馆资料为准；此处仅列校名与办学层次的沿革。<a class="chrono-more" href="#history">查看完整校史 →</a></p>
+  </div>
+</section>
+
+
+<!-- ============================ 树说话 ============================ -->
+<div class="toast" id="toast"></div>
+
+<!-- ============================ C 占位 ============================ -->
+<section id="decision">
+  <div>
+    <div class="yr" id="decYear"></div>
+    <h3 id="decQ"></h3>
+    <p>这里进入约 2–2.5 分钟的抉择体验：情境 → 调查 → 选择 → 人物回应 → 历史揭示。当前为 B 站原型，先用占位页面验证「进入 / 返回」的手感。</p>
+    <button class="back" id="back">返回年轮</button>
+  </div>
+</section>
+
+<!-- ============================ C 段 ============================ -->
+<section id="story">
+  <div class="story-inner">
+    <div class="story-head">
+      <span class="yr" id="storyYear">1935</span>
+      <span class="who" id="storyWho">中央大学校长 · 罗家伦</span>
+      <span class="stage" id="storyStage">情境</span>
+    </div>
+
+    <!-- C1：翻书 -->
+    <div class="stage-pane" id="stageCase">
+      <div class="stack" id="stack"></div>
+    </div>
+
+    <!-- C2 调查 -->
+    <div class="stage-pane" id="stageAsk" hidden>
+      <p class="ask-intro">案上就这些。在下判断之前，还可以问三个问题。</p>
+      <div class="ask-list" id="askList"></div>
+    </div>
+
+    <!-- C3 选择 -->
+    <div class="stage-pane" id="stagePick" hidden>
+      <div class="pick-wrap" id="pickList"></div>
+    </div>
+
+    <!-- C4 手记 / 清单 / 记录 -->
+    <div class="stage-pane" id="stageNote" hidden>
+      <div class="paper note-paper">
+        <div class="note-meta">
+          <span id="noteMetaL">手记</span>
+          <span id="noteMetaR">二十四年秋 · 南京</span>
+        </div>
+        <p class="note-body rule" id="noteBody"></p>
+        <div class="ledger" id="noteLedger" hidden></div>
+        <div class="lines" id="noteLines" hidden></div>
+        <p class="note-sign" id="noteSign"></p>
+        <p class="note-foot">基于校史资料的模拟回应</p>
+      </div>
+    </div>
+
+    <!-- C5 历史揭示 -->
+    <div class="stage-pane" id="stageReveal" hidden>
+      <div class="reveal">
+        <p class="r-tag" id="rvTag"></p>
+        <p class="r-main" id="rvMain"></p>
+        <p class="r-echo" id="rvEcho"></p>
+        <p class="r-src" id="rvSrc"></p>
+      </div>
+    </div>
+
+    <div class="story-nav">
+      <button class="nav-back" id="storyBack">← 上一步</button>
+      <span class="story-step" id="storyStep">档案 1 / 3</span>
+      <button class="story-btn" id="storyNext">翻下一张</button>
+    </div>
+
+    <p class="story-warn">情境为基于公开史料的场景重构，对话与数值为示意，正式发布前请以校史馆资料核实。</p>
+  </div>
+</section>
+<!-- ============================ 树的记忆清单 ============================ -->
+<section class="memory" id="memory">
+  <div class="memory-inner">
+    <h2>六朝松记得</h2>
+    <p class="lead">你在这棵树上做过的选择</p>
+    <ul id="memList"></ul>
+    <p class="last" id="memLast"></p>
+    <button class="close" id="memClose">回到年轮</button>
+  </div>
+</section>
+</section>
+
+<script src="song.js"></script>
+</body>
+</html>

@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="description" content="东南大学校史 · 红色文化 · 八大书院 —— 交互式校园文化长廊" />
+<title>止于至善 · 东南大学校史文化长廊</title>
+<link rel="stylesheet" href="styles.css" />
+<link rel="stylesheet" href="theme-3d.css" /><link rel="stylesheet" href="sky.css" />
+<link rel="stylesheet" href="song.css" />
+<style>
+  /* 六朝松区块嵌进主页后，要让开固定的顶部导航 */
+  #song .topbar{padding-top:88px}
+  #song .intro-grid{padding-top:64px}
+  /* 让这一屏滚动到位时更“整” */
+  #song{scroll-margin-top:0}
+</style>
+<style>
+  /* 六朝松这一屏里收起吉祥物与聊天，避免压住图版 */
+  body.in-song .mascot,
+  body.in-song .chat{opacity:0;pointer-events:none;transform:translateY(14px)}
+  .mascot,.chat{transition:opacity .45s ease, transform .45s ease}
+</style>
+</head>
+<body>
+
+<div class="song-progress" id="progress"></div>
+
+<!-- ============================== 导航 ============================== -->
+<nav class="nav">
+  <a class="brand" href="#top"><span class="seal">東</span>东南大学 · 校史文化长廊</a>
+  <div class="nav-links">
+    <a href="#song">01 六朝松</a>
+    <a href="#red">02 红色文化</a>
+    <a href="#colleges">03 八大书院</a>
+  </div>
+</nav>
+
+<!-- ============================== 首屏 ============================== -->
+<header class="hero" id="top" data-mood="night">
+  <!-- 全屏天空：随时间与天气切换（纯 CSS 扁平插画，保证文字可读） -->
+  <div class="sky" aria-hidden="true">
+    <div class="sky-grad"></div>
+    <div class="sky-sun"></div>
+    <div class="sky-moon"></div>
+    <div class="sky-stars" id="skyStars"></div>
+    <div class="sky-clouds"><i></i><i></i><i></i><i></i></div>
+    <div class="sky-rain" id="skyRain"></div>
+    <div class="sky-snow" id="skySnow"></div>
+  </div>
+  <!-- Three.js 场景：大礼堂 + 八角喷泉 + 梧桐道 -->
+  <canvas class="scene-canvas" id="sceneCanvas" aria-hidden="true"></canvas>
+  <div class="hero-scrim" aria-hidden="true"></div>
+
+  <div class="hero-inner">
+    <div class="hero-copy">
+      <p class="eyebrow">1902 — NOW · 南京四牌楼</p>
+      <h1>百廿东大<br /><em>止于至善</em></h1>
+      <p class="lede" id="heroQuote"><span class="q-text">让过去拥有未来</span></p>
+      <div class="hero-actions">
+        <a class="btn btn-solid" href="#song">进入六朝松</a>
+        <button class="btn btn-ghost" id="rebuildBtn" type="button">重看大礼堂生成</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="hero-meta">1931 落成 · 爱奥尼柱式 · 铜绿穹顶 · 八角喷泉</div>
+  <div class="mood-switch" id="moodSwitch" role="group" aria-label="切换天空与天气">
+    <button type="button" data-mood="auto" class="is-active">自动</button>
+    <button type="button" data-mood="dawn">清晨</button>
+    <button type="button" data-mood="noon">正午</button>
+    <button type="button" data-mood="dusk">黄昏</button>
+    <button type="button" data-mood="night">夜晚</button>
+    <button type="button" data-mood="rain">下雨</button>
+    <button type="button" data-mood="snow">下雪</button>
+  </div>
+
+  <div class="scroll-cue">SCROLL</div>
+
+  <!-- 无 WebGL 时的静态回退版本 -->
+  <div class="hall-fallback" id="hallFallback" hidden>
+    <div class="hall-tilt" id="hallTilt">
+      <svg class="hall" id="hall" viewBox="0 0 900 720" role="img"
+           aria-label="东南大学四牌楼校区大礼堂逐层生成的动画">
+        <defs>
+          <linearGradient id="stone" x1="0" y1="0" x2=".45" y2="1">
+            <stop offset="0" stop-color="#f7f0de" />
+            <stop offset=".55" stop-color="#e4d8bc" />
+            <stop offset="1" stop-color="#b9a887" />
+          </linearGradient>
+          <linearGradient id="stone2" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#ece2c9" />
+            <stop offset="1" stop-color="#c6b791" />
+          </linearGradient>
+          <linearGradient id="stone3" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#cdbf9f" />
+            <stop offset="1" stop-color="#a2906e" />
+          </linearGradient>
+          <radialGradient id="copper" cx=".36" cy=".12" r=".95">
+            <stop offset="0" stop-color="#b6e2d2" />
+            <stop offset=".48" stop-color="#74b0a0" />
+            <stop offset="1" stop-color="#2f5b53" />
+          </radialGradient>
+          <radialGradient id="glow" cx=".5" cy=".5" r=".5">
+            <stop offset="0" stop-color="#9fd0ff" stop-opacity=".3" />
+            <stop offset="1" stop-color="#9fd0ff" stop-opacity="0" />
+          </radialGradient>
+          <radialGradient id="lamp" cx=".5" cy=".5" r=".5">
+            <stop offset="0" stop-color="#ffd98a" stop-opacity=".95" />
+            <stop offset="1" stop-color="#ffb347" stop-opacity="0" />
+          </radialGradient>
+        </defs>
+
+        <ellipse cx="450" cy="440" rx="360" ry="250" fill="url(#glow)" />
+
+        <g class="part" style="--i:11">
+          <rect x="372" y="204" width="156" height="60" fill="url(#stone2)" />
+          <rect x="364" y="196" width="172" height="10" fill="#ded1b2" />
+          <path d="M372 204 A78 78 0 0 1 528 204 Z" fill="url(#copper)" />
+          <path d="M450 126 L450 204" stroke="#28524b" stroke-width="2" opacity=".45" />
+          <path d="M404 140 Q422 190 404 204" fill="none" stroke="#28524b" stroke-width="2" opacity=".3" />
+          <path d="M496 140 Q478 190 496 204" fill="none" stroke="#28524b" stroke-width="2" opacity=".3" />
+          <path d="M372 204 A78 78 0 0 1 528 204" fill="none" stroke="#c8e6da" stroke-width="1.4" opacity=".5" />
+          <rect x="430" y="100" width="40" height="26" rx="2" fill="url(#stone)" />
+          <path d="M430 100 A20 20 0 0 1 470 100 Z" fill="#82b8a8" />
+          <path d="M450 76 L450 100" stroke="#ded1b2" stroke-width="4" />
+          <circle cx="450" cy="72" r="6" fill="#c8a15a" />
+        </g>
+
+        <g class="part" style="--i:10">
+          <path d="M160 338 L450 236 L740 338 Z" fill="url(#stone)" />
+          <path d="M160 338 L450 236 L740 338" fill="none" stroke="#b0a082" stroke-width="3" />
+          <circle cx="450" cy="300" r="17" fill="none" stroke="#b0a082" stroke-width="3" />
+          <path d="M433 300 h34 M450 283 v34" stroke="#b0a082" stroke-width="2" opacity=".7" />
+        </g>
+
+        <g class="part" style="--i:9">
+          <rect x="142" y="334" width="616" height="9" fill="#dccfae" />
+          <rect x="150" y="343" width="600" height="45" fill="url(#stone2)" />
+          <path d="M150 358 H750" stroke="#b9a887" stroke-width="1.5" opacity=".6" />
+          <g fill="#ad9c7a">
+            <rect x="196" y="364" width="7" height="16" /><rect x="236" y="364" width="7" height="16" />
+            <rect x="276" y="364" width="7" height="16" /><rect x="316" y="364" width="7" height="16" />
+            <rect x="577" y="364" width="7" height="16" /><rect x="617" y="364" width="7" height="16" />
+            <rect x="657" y="364" width="7" height="16" /><rect x="697" y="364" width="7" height="16" />
+          </g>
+        </g>
+
+        <g class="part" style="--i:2">
+          <rect x="176" y="388" width="548" height="228" fill="#c1b291" />
+          <path d="M176 420 H724 M176 600 H724" stroke="#a2916f" stroke-width="2" opacity=".55" />
+          <path d="M416 616 L416 512 A34 34 0 0 1 484 512 L484 616 Z" fill="#1f211c" />
+          <path d="M416 616 L416 512 A34 34 0 0 1 484 512 L484 616" fill="none" stroke="#8d7f61" stroke-width="4" />
+          <circle cx="450" cy="470" r="26" fill="url(#lamp)" opacity=".85" />
+          <ellipse cx="450" cy="512" rx="34" ry="14" fill="#ffd98a" opacity=".18" />
+          <g>
+            <rect x="236" y="470" width="44" height="112" rx="22" fill="#1f211c" />
+            <rect x="332" y="470" width="44" height="112" rx="22" fill="#1f211c" />
+            <rect x="524" y="470" width="44" height="112" rx="22" fill="#1f211c" />
+            <rect x="620" y="470" width="44" height="112" rx="22" fill="#1f211c" />
+          </g>
+          <g fill="url(#lamp)" opacity=".55">
+            <circle cx="258" cy="526" r="20" /><circle cx="354" cy="526" r="20" />
+            <circle cx="546" cy="526" r="20" /><circle cx="642" cy="526" r="20" />
+          </g>
+        </g>
+
+        <g class="part" style="--i:3">
+          <rect x="193" y="388" width="34" height="16" fill="#e8ddc3" />
+          <rect x="200" y="404" width="20" height="198" fill="url(#stone)" />
+          <path d="M205 404 V602 M211 404 V602 M217 404 V602" stroke="#c7b895" stroke-width="1.2" opacity=".8" />
+          <rect x="196" y="602" width="28" height="14" fill="#dbcfb0" />
+        </g>
+        <g class="part" style="--i:4">
+          <rect x="289" y="388" width="34" height="16" fill="#e8ddc3" />
+          <rect x="296" y="404" width="20" height="198" fill="url(#stone)" />
+          <path d="M301 404 V602 M307 404 V602 M313 404 V602" stroke="#c7b895" stroke-width="1.2" opacity=".8" />
+          <rect x="292" y="602" width="28" height="14" fill="#dbcfb0" />
+        </g>
+        <g class="part" style="--i:5">
+          <rect x="385" y="388" width="34" height="16" fill="#e8ddc3" />
+          <rect x="392" y="404" width="20" height="198" fill="url(#stone)" />
+          <path d="M397 404 V602 M403 404 V602 M409 404 V602" stroke="#c7b895" stroke-width="1.2" opacity=".8" />
+          <rect x="388" y="602" width="28" height="14" fill="#dbcfb0" />
+        </g>
+        <g class="part" style="--i:6">
+          <rect x="481" y="388" width="34" height="16" fill="#e8ddc3" />
+          <rect x="488" y="404" width="20" height="198" fill="url(#stone)" />
+          <path d="M493 404 V602 M499 404 V602 M505 404 V602" stroke="#c7b895" stroke-width="1.2" opacity=".8" />
+          <rect x="484" y="602" width="28" height="14" fill="#dbcfb0" />
+        </g>
+        <g class="part" style="--i:7">
+          <rect x="577" y="388" width="34" height="16" fill="#e8ddc3" />
+          <rect x="584" y="404" width="20" height="198" fill="url(#stone)" />
+          <path d="M589 404 V602 M595 404 V602 M601 404 V602" stroke="#c7b895" stroke-width="1.2" opacity=".8" />
+          <rect x="580" y="602" width="28" height="14" fill="#dbcfb0" />
+        </g>
+        <g class="part" style="--i:8">
+          <rect x="673" y="388" width="34" height="16" fill="#e8ddc3" />
+          <rect x="680" y="404" width="20" height="198" fill="url(#stone)" />
+          <path d="M685 404 V602 M691 404 V602 M697 404 V602" stroke="#c7b895" stroke-width="1.2" opacity=".8" />
+          <rect x="676" y="602" width="28" height="14" fill="#dbcfb0" />
+        </g>
+
+        <g class="part" style="--i:0">
+          <rect x="150" y="616" width="600" height="16" fill="url(#stone3)" />
+          <rect x="150" y="616" width="600" height="4" fill="#ded1b2" />
+        </g>
+        <g class="part" style="--i:1">
+          <rect x="296" y="632" width="308" height="12" fill="#c0b08c" />
+          <rect x="266" y="644" width="368" height="12" fill="#b2a179" />
+          <rect x="236" y="656" width="428" height="12" fill="#a3926a" />
+        </g>
+
+        <ellipse class="shade" cx="450" cy="672" rx="300" ry="16" fill="#000" opacity=".45" />
+      </svg>
+    </div>
+    <div class="scan"></div>
+    <div class="dust" id="dust"></div>
+  </div>
+</header>
+
+<main>
+
+  <!-- ============================ 六朝松（第二屏） ============================ -->
+<section class="song" id="song">
+<!-- ============================ A 首屏 ============================ -->
+<section id="intro">
+  <div class="seam" aria-hidden="true"></div>
+  <div class="intro-grid">
+    <div class="intro-copy">
+      <p class="eyebrow">四牌楼 · 六朝松</p>
+      <h1>六朝松的年轮：<br /><em>一所大学的选择时刻</em></h1>
+      <p class="sub">触摸年轮，在东南大学的关键节点做一次判断——树会记住你的选择。</p>
+      <button class="cta" id="enter"><span class="dot"></span>触摸年轮</button>
+    </div>
+
+    <div class="plate">
+      <div class="screen" id="screen">
+        <figure class="panel" style="--w:238;--h:362">
+          <span class="frame"><img src="img/plate-a.webp" alt="六朝松线描版画" /></span>
+          <figcaption>版　画</figcaption>
+        </figure>
+        <figure class="panel" style="--w:258;--h:402">
+          <span class="frame"><img src="img/plate-b.webp" alt="六朝松历史旧影" /></span>
+          <figcaption>旧　影</figcaption>
+        </figure>
+        <figure class="panel" style="--w:234;--h:322">
+          <span class="frame"><img src="img/plate-c.webp" alt="六朝松今日实景" /></span>
+          <figcaption>今　日</figcaption>
+        </figure>
+      </div>
+      <p class="plate-note">六朝松是东南大学的<b>精神图腾</b>，位于校园西北，相传为六朝遗株，为金陵城古树之至古。据著名林学家马大浦、黄保龙鉴定，其学名为“<b>桧柏</b>”，树龄已<b>逾千年</b>。“古堞烟埋宫井树，陈主吴姬堕泉处”，六朝宫苑，今已不复找寻，唯此青松历经千余年，栉风沐雨，仍霜干虬枝，纷披偃盖，<b>饶有生意</b>。六朝松见证了六朝宫苑的繁华疏落，见证了《昭明文选》的成书、《永乐大典》的编纂，更见证了学校辉煌灿烂的百年办学历程。</p>
+    </div>
+  </div>
+  <a class="skip" href="#" id="skip">跳过互动，直接看年表</a>
+</section>
+
+
+<!-- ============================ B 年轮主视图 ============================ -->
+<section id="ringview">
+  <div class="topbar">
+    <span class="tb-left">
+      <button class="back-intro" id="backIntro" type="button">← 回到开头</button>
+      <span>六朝松 · 年轮</span>
+    </span>
+    <span class="song-progress">已抉择 <b id="done">0</b> / 4</span>
+  </div>
+
+  <div class="disc-wrap">
+    <canvas id="disc"></canvas>
+  </div>
+
+  <div class="caption" id="caption">
+    <div class="yr" id="capYear"></div>
+    <div class="q" id="capQ"></div>
+    <div class="hint" id="capHint"></div>
+  </div>
+
+  <div class="ground" id="ground"></div>
+  <div class="yearmark" id="yearmark"></div>
+
+
+  <button class="chrono-btn" id="chronoBtn" type="button">校史简表</button>
+
+  <button class="remember" id="remember" disabled>
+    六朝松记得 <span class="n" id="memCount">0</span>
+  </button>
+</section>
+
+<!-- ============================ 辅助年表 ============================ -->
+<section class="chrono" id="chrono">
+  <div class="chrono-sheet">
+    <div class="chrono-head">
+      <h3>校史简表</h3>
+      <span class="sub">1902 — NOW</span>
+      <button class="chrono-close" id="chronoClose" type="button" aria-label="关闭">×</button>
+    </div>
+    <div class="chrono-list" id="chronoList"></div>
+    <p class="chrono-note">完整校史以校史馆资料为准；此处仅列校名与办学层次的沿革。<a class="chrono-more" href="#history">查看完整校史 →</a></p>
+  </div>
+</section>
+
+
+<!-- ============================ 树说话 ============================ -->
+<div class="toast" id="toast"></div>
+
+<!-- ============================ C 占位 ============================ -->
+<section id="decision">
+  <div>
+    <div class="yr" id="decYear"></div>
+    <h3 id="decQ"></h3>
+    <p>这里进入约 2–2.5 分钟的抉择体验：情境 → 调查 → 选择 → 人物回应 → 历史揭示。当前为 B 站原型，先用占位页面验证「进入 / 返回」的手感。</p>
+    <button class="back" id="back">返回年轮</button>
+  </div>
+</section>
+
+<!-- ============================ C 段 ============================ -->
+<section id="story">
+  <div class="story-inner">
+    <div class="story-head">
+      <span class="yr" id="storyYear">1935</span>
+      <span class="who" id="storyWho">中央大学校长 · 罗家伦</span>
+      <span class="stage" id="storyStage">情境</span>
+    </div>
+
+    <!-- C1：翻书 -->
+    <div class="stage-pane" id="stageCase">
+      <div class="stack" id="stack"></div>
+    </div>
+
+    <!-- C2 调查 -->
+    <div class="stage-pane" id="stageAsk" hidden>
+      <p class="ask-intro">案上就这些。在下判断之前，还可以问三个问题。</p>
+      <div class="ask-list" id="askList"></div>
+    </div>
+
+    <!-- C3 选择 -->
+    <div class="stage-pane" id="stagePick" hidden>
+      <div class="pick-wrap" id="pickList"></div>
+    </div>
+
+    <!-- C4 手记 / 清单 / 记录 -->
+    <div class="stage-pane" id="stageNote" hidden>
+      <div class="paper note-paper">
+        <div class="note-meta">
+          <span id="noteMetaL">手记</span>
+          <span id="noteMetaR">二十四年秋 · 南京</span>
+        </div>
+        <p class="note-body rule" id="noteBody"></p>
+        <div class="ledger" id="noteLedger" hidden></div>
+        <div class="lines" id="noteLines" hidden></div>
+        <p class="note-sign" id="noteSign"></p>
+        <p class="note-foot">基于校史资料的模拟回应</p>
+      </div>
+    </div>
+
+    <!-- C5 历史揭示 -->
+    <div class="stage-pane" id="stageReveal" hidden>
+      <div class="reveal">
+        <p class="r-tag" id="rvTag"></p>
+        <p class="r-main" id="rvMain"></p>
+        <p class="r-echo" id="rvEcho"></p>
+        <p class="r-src" id="rvSrc"></p>
+      </div>
+    </div>
+
+    <div class="story-nav">
+      <button class="nav-back" id="storyBack">← 上一步</button>
+      <span class="story-step" id="storyStep">档案 1 / 3</span>
+      <button class="story-btn" id="storyNext">翻下一张</button>
+    </div>
+
+    <p class="story-warn">情境为基于公开史料的场景重构，对话与数值为示意，正式发布前请以校史馆资料核实。</p>
+  </div>
+</section>
+<!-- ============================ 树的记忆清单 ============================ -->
+<section class="memory" id="memory">
+  <div class="memory-inner">
+    <h2>六朝松记得</h2>
+    <p class="lead">你在这棵树上做过的选择</p>
+    <ul id="memList"></ul>
+    <p class="last" id="memLast"></p>
+    <button class="close" id="memClose">回到年轮</button>
+  </div>
+</section>
+</section>
+
+  <!-- ============================ 辅助年表 · 原校史 ============================ -->
+  <section class="section era-section" id="history">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <p class="eyebrow">辅助年表 · 校史沿革</p>
+        <h2>两个甲子，一条不断改名的路</h2>
+        <p>
+          1902 年至今，这所学校换过很多名字：三江、两江、南高、东大、中山、中大、南工——
+          每一次更名，都是一次时代转弯。左边点一个时期，右边展开它的故事。
+        </p>
+      </div>
+
+      <div class="era-layout reveal">
+        <aside class="era-nav">
+          <div class="era-list" id="eraList" role="tablist" aria-label="校史时期"></div>
+        </aside>
+        <div class="era-panel" id="eraPanel" role="tabpanel" aria-label="时期详情"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================== 02 红色文化 ========================== -->
+  <section class="section red-section" id="red">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <p class="eyebrow">Chapter 02 · 红色文化</p>
+        <h2>在这座校园里，<br />历史是可以走进去的</h2>
+        <p>
+          梅庵、四牌楼、雨花台——东大的红色记忆不在展板上，就在你每天路过的那栋楼里。
+        </p>
+      </div>
+      <div class="red-grid" id="redGrid"></div>
+    </div>
+  </section>
+
+  <!-- ========================== 03 八大书院 ========================== -->
+  <section class="section colleges-section" id="colleges">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <p class="eyebrow">Chapter 03 · 八大书院</p>
+        <h2>八颗星，拼出 123 年</h2>
+        <p>
+          三江、南高、东南、中大、南工、南雍、日新、至善——2025 年东大成立八大书院。
+          名字连起来，几乎就是一部校史。拖动这条画廊，它们会绕着轴转；点开任意一所，看它的故事。
+        </p>
+      </div>
+
+      <div class="carousel reveal" id="carousel" tabindex="0"
+           aria-label="八大书院旋转画廊：左右拖动或使用方向键旋转，点击卡片展开">
+        <div class="ring" id="ring"></div>
+      </div>
+
+      <div class="carousel-bar">
+        <button class="cbtn" id="rotPrev" type="button" aria-label="向左转">‹</button>
+        <p class="carousel-tip" id="rotLabel">拖动旋转 · 点击卡片展开</p>
+        <button class="cbtn" id="rotNext" type="button" aria-label="向右转">›</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================= 尾声 ============================= -->
+  <section class="outro" id="outro">
+    <div class="outro-wall">
+      <div class="seal-text" id="sealText" aria-label="止於至善">
+        <span>止</span><span>於</span><span>至</span><span>善</span>
+      </div>
+      <p class="seal-quote">《礼记 · 大学》：“大学之道，在明明德，在亲民，在止於至善”</p>
+      <p class="outro-note" id="outroQuote"><span class="q-text">岁月失语，惟石能言</span></p>
+    </div>
+    <p class="foot-note">
+      页面内容依据东南大学公开资料整理，数字与表述请以校史馆 / 官方发布为准。<br />
+      三维场景为示意性原创建模，非工程图纸。
+    </p>
+  </section>
+
+</main>
+
+<!-- ========================== 书院详情弹层 ========================== -->
+<div class="modal" id="modal" hidden role="dialog" aria-modal="true" aria-labelledby="mTitle">
+  <div class="modal-backdrop" id="mBackdrop"></div>
+  <div class="modal-card" id="modalCard" style="--hue:210">
+    <div class="m-top">
+      <div>
+        <h3 id="mTitle">书院</h3>
+        <p class="m-en" id="mEn">COLLEGE</p>
+      </div>
+      <button class="m-close" id="mClose" type="button" aria-label="关闭">✕</button>
+    </div>
+    <div class="m-rule"></div>
+    <div class="m-block">
+      <h4>源流 · Source</h4>
+      <p id="mYear"></p>
+    </div>
+    <div class="m-block">
+      <h4>命名由来 · Origin</h4>
+      <p id="mFrom"></p>
+    </div>
+    <div class="m-block">
+      <h4>培养特色 · Focus</h4>
+      <p id="mFocus"></p>
+    </div>
+    <div class="m-block">
+      <h4>关键词 · Tags</h4>
+      <div class="m-tags" id="mTags"></div>
+    </div>
+    <div class="m-foot">
+      <button class="m-prev" id="mPrev" type="button">← 上一书院</button>
+      <small id="mIdx">1 / 8</small>
+      <button class="m-next" id="mNext" type="button">下一书院 →</button>
+    </div>
+  </div>
+</div>
+
+<!-- =========================== 吉祥物 / 对话 =========================== -->
+<button class="mascot" id="mascotBtn" type="button" aria-expanded="false"
+        aria-controls="chat" aria-label="和东大鼠鼠聊聊">
+  <span class="mascot-body">
+    <span class="mascot-ping" aria-hidden="true"></span>
+    <svg class="mascot-svg" id="mascotSvg" viewBox="0 0 100 100" aria-hidden="true">
+      <!-- 大尾巴 -->
+      <g class="q-tail">
+        <path class="ln" fill="#F4703C"
+              d="M62 86 C82 88 94 71 92 52 C90 33 76 25 68 34 C61 42 70 50 65 59 C61 67 52 72 52 80 Z" />
+      </g>
+
+      <!-- 后脚 -->
+      <ellipse class="ln" cx="40" cy="89" rx="7" ry="4.3" fill="#F4703C" />
+      <ellipse class="ln" cx="60" cy="89" rx="7" ry="4.3" fill="#F4703C" />
+
+      <!-- 短裤 -->
+      <path class="ln" fill="#F3E4C2" d="M36 81 Q50 86.5 64 81 L64 87.5 Q50 92.5 36 87.5 Z" />
+
+      <!-- 藏蓝 Polo -->
+      <path class="ln" fill="#1F3A6E" d="M34 66 Q50 61 66 66 L67 82 Q50 88 33 82 Z" />
+      <path class="ln" fill="#16305C" d="M42.6 63.4 L50 69.8 L57.4 63.4 L53.6 61.2 L50 64.4 L46.4 61.2 Z" />
+      <line x1="50" y1="69.8" x2="50" y2="76.4" stroke="#0E2445" stroke-width="1.5" />
+      <circle cx="50" cy="72" r="1.05" fill="#EAF1FF" />
+      <circle cx="50" cy="75.2" r="1.05" fill="#EAF1FF" />
+      <text x="50" y="81.4" text-anchor="middle" font-size="6.4" fill="#FFFFFF"
+            font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif"
+            letter-spacing=".2">遇见东南</text>
+
+      <!-- 一只手抬起挥手（另一侧被大尾巴挡住，剪影更干净） -->
+      <g class="q-arm-r">
+        <path d="M37 67 Q25 64 21.5 53" fill="none" stroke="#4A2A1C"
+              stroke-width="10.4" stroke-linecap="round" />
+        <path d="M37 67 Q25 64 21.5 53" fill="none" stroke="#F4703C"
+              stroke-width="6.4" stroke-linecap="round" />
+        <circle class="ln" cx="20.6" cy="50" r="5" fill="#F4703C" />
+      </g>
+
+      <!-- 头 -->
+      <g class="q-head">
+        <!-- 卷曲呆毛 -->
+        <path d="M48 19 C43 9 51 1.5 57.5 6.5" fill="none" stroke="#4A2A1C"
+              stroke-width="7.2" stroke-linecap="round" />
+        <path d="M48 19 C43 9 51 1.5 57.5 6.5" fill="none" stroke="#F4703C"
+              stroke-width="3.4" stroke-linecap="round" />
+
+        <!-- 耳朵 -->
+        <ellipse class="ln" cx="23" cy="21" rx="7.4" ry="11.6" fill="#F4703C"
+                 transform="rotate(-18 23 21)" />
+        <ellipse cx="23.4" cy="21" rx="3.4" ry="6.3" fill="#FFB392"
+                 transform="rotate(-18 23.4 21)" />
+        <ellipse class="ln" cx="77" cy="21" rx="7.4" ry="11.6" fill="#F4703C"
+                 transform="rotate(18 77 21)" />
+        <ellipse cx="76.6" cy="21" rx="3.4" ry="6.3" fill="#FFB392"
+                 transform="rotate(18 76.6 21)" />
+
+        <!-- 脸 -->
+        <ellipse class="ln" cx="50" cy="40" rx="27.5" ry="24.5" fill="#F4703C" />
+
+        <!-- 白色脸颊 -->
+        <ellipse cx="50" cy="52.5" rx="15.6" ry="10.6" fill="#FFFFFF" />
+
+        <!-- 又大又圆的黑眼睛 -->
+        <g class="q-eye">
+          <circle cx="38.5" cy="37" r="7" fill="#1A1A1A" />
+          <circle cx="61.5" cy="37" r="7" fill="#1A1A1A" />
+          <circle cx="35.9" cy="34" r="2.7" fill="#FFFFFF" />
+          <circle cx="58.9" cy="34" r="2.7" fill="#FFFFFF" />
+          <circle cx="41.6" cy="40.4" r="1.25" fill="#FFFFFF" />
+          <circle cx="64.6" cy="40.4" r="1.25" fill="#FFFFFF" />
+        </g>
+
+        <!-- 粉色圆腮红 -->
+        <circle cx="34" cy="50.5" r="4.4" fill="#F79AA8" />
+        <circle cx="66" cy="50.5" r="4.4" fill="#F79AA8" />
+
+        <!-- 鼻子 + 笑 -->
+        <path d="M47 53 Q50 51.6 53 53 Q50 57 47 53 Z" fill="#5A3B2A" />
+        <path d="M50 57 Q47.4 60.4 45.2 58" stroke="#5A3B2A" stroke-width="1.7"
+              fill="none" stroke-linecap="round" />
+        <path d="M50 57 Q52.6 60.4 54.8 58" stroke="#5A3B2A" stroke-width="1.7"
+              fill="none" stroke-linecap="round" />
+      </g>
+    </svg>
+  </span>
+  <span class="mascot-label">东大鼠鼠</span>
+</button>
+
+<section class="chat" id="chat" aria-label="校史问答" aria-live="polite">
+  <div class="chat-head">
+    <span class="dot" aria-hidden="true"></span>
+    <span class="who">
+      <strong>东大鼠鼠</strong>
+      <small>SEU SQUIRREL GUIDE</small>
+    </span>
+    <button class="chat-close" id="chatClose" type="button" aria-label="收起对话">✕</button>
+  </div>
+  <div class="chat-log" id="chatLog"></div>
+  <div class="chat-chips">
+    <button type="button">大礼堂多高？</button>
+    <button type="button">梅庵发生过什么？</button>
+    <button type="button">八大书院怎么分？</button>
+    <button type="button">校训是什么？</button>
+  </div>
+  <form class="chat-form" id="chatForm">
+    <input id="chatInput" type="text" autocomplete="off"
+           placeholder="问我关于东大的问题…" aria-label="输入问题" />
+    <button type="submit" aria-label="发送">↑</button>
+  </form>
+</section>
+
+<noscript>
+  <p style="padding:20px;text-align:center;background:#111;color:#eee">
+    这个页面需要启用 JavaScript 才能看到时间轴与交互动效。
+  </p>
+</noscript>
+
+<script src="vendor/three.min.js"></script>
+<script src="data.js"></script>
+<script src="scene3d.js"></script>
+<script src="app.js"></script>
+<script src="song.js"></script>
+<script>
+/* 六朝松区块进入视野时，收起主站的吉祥物 */
+(function () {
+  var song = document.getElementById('song');
+  if (!song || !('IntersectionObserver' in window)) return;
+  new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) {
+      document.body.classList.toggle('in-song', e.intersectionRatio > 0.55);
+    });
+  }, { threshold: [0, 0.55, 1] }).observe(song);
+})();
+</script>
+</body>
+</html>
