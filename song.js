@@ -1175,6 +1175,17 @@
     });
     paraRaf = requestAnimationFrame(parallax);
   }
+  /* 手机端：六朝松介绍文案的展开 / 收起 */
+  (function () {
+    const note = document.querySelector('.plate-note');
+    const toggle = document.getElementById('plateToggle');
+    if (!note || !toggle) return;
+    toggle.addEventListener('click', function () {
+      const open = note.classList.toggle('is-open');
+      toggle.textContent = open ? '收起' : '展开全文';
+    });
+  })();
+
   function startParallax() {
     if (!paraRaf && songVisible && !intro.classList.contains('gone')) {
       paraRaf = requestAnimationFrame(parallax);

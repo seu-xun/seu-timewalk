@@ -257,20 +257,54 @@
   }
   .plate-note b{color:rgba(243,236,224,.82);font-weight:500}
 
+  /* 手机端：文案默认收成两行，点“展开全文”才铺开 */
+  .plate-toggle{display:none}
+
   @media (max-width:1180px){
     #intro{overflow-y:auto}
+    /* 树皮背景默认向下多铺 10%，会白白撑出可滚动高度，
+       手机上就变成“内部还能再滑一段”；这里收回到边界内 */
+    #intro::before{top:0;bottom:0}
     .intro-grid{
       grid-template-columns:minmax(0,1fr);align-items:start;
-      height:auto;min-height:100%;
-      padding:74px 24px 104px;
+      height:auto;
+      /* 不要再撑满整屏：撑满会把底部的“跳过互动”挤出可视区，
+         于是这一屏出现内部滚动，手机上滑起来就“黏” */
+      min-height:0;
+      padding:34px 22px 24px;
     }
+    .intro-copy h1{margin-bottom:12px}
+    .intro-copy .sub{margin-bottom:20px}
     .plate{max-width:none}
-    .screen{--k:.56;justify-content:flex-start;overflow-x:auto;padding-bottom:12px;scrollbar-width:none}
+    .screen{--k:.50;justify-content:flex-start;overflow-x:auto;padding-bottom:8px;scrollbar-width:none}
     .screen::-webkit-scrollbar{display:none}
     .panel{margin-left:-34px}
     .panel:first-child{margin-left:0 !important}
-    .plate-note{font-size:12.5px;line-height:1.95;max-width:none;margin-top:22px}
-    .skip{position:static;display:block;margin:26px 24px 0;text-align:right}
+
+    .plate-note{
+      font-size:12.5px;line-height:1.9;max-width:none;margin-top:14px;
+      display:-webkit-box;
+      -webkit-line-clamp:2;
+      -webkit-box-orient:vertical;
+      overflow:hidden;
+    }
+    .plate-note.is-open{
+      display:block;
+      -webkit-line-clamp:unset;
+      overflow:visible;
+    }
+    .plate-toggle{
+      display:inline-block;
+      margin-top:8px;
+      padding:4px 0;
+      background:none;border:none;
+      font:inherit;font-size:12.5px;letter-spacing:.08em;
+      color:rgba(200,161,90,.9);
+      border-bottom:1px solid rgba(200,161,90,.32);
+      cursor:pointer;
+    }
+
+    .skip{position:static;display:block;margin:14px 22px 0;text-align:right}
   }
 
 
