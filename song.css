@@ -142,6 +142,26 @@
     transition:background .3s,border-color .3s,transform .3s;
   }
   .cta:hover{background:rgba(200,161,90,.12);border-color:var(--gold);transform:translateY(-2px)}
+
+  /* ---------- 玻璃 AI 按钮（ThreeUI GlassAiButton，作为「触摸年轮」主 CTA） ---------- */
+  .glass-cta{
+    position:relative;
+    width:min(400px, 68vw);
+    aspect-ratio:400 / 132;
+    margin-top:clamp(20px, 2.4vw, 28px);
+    border-radius:999px;
+    overflow:hidden;
+    box-shadow:0 10px 26px rgba(0,0,0,.45), 0 0 0 1px rgba(200,161,90,.10);
+    cursor:pointer;
+  }
+  .glass-cta iframe{
+    display:block;
+    width:100%;
+    height:100%;
+    border:0;
+    background:transparent;
+  }
+
   .cta .dot{width:6px;height:6px;border-radius:50%;background:var(--gold);box-shadow:0 0 12px var(--gold)}
   /* 回到主站的面包屑 */
   .back-site{

@@ -1237,6 +1237,13 @@
   document.getElementById('backIntro').addEventListener('click', backToIntro);
 
   document.getElementById('enter').addEventListener('click', enter);
+
+  /* 玻璃按钮在 iframe 里，点击通过 postMessage 通知这里进入年轮 */
+  window.addEventListener('message', function (e) {
+    if (!e.data || e.data.type !== 'sixchao:enter') return;
+    if (intro.classList.contains('gone')) return;
+    enter();
+  });
   document.getElementById('skip').addEventListener('click', function (e) {
     e.preventDefault();
     enter();
