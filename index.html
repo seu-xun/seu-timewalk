@@ -10,6 +10,37 @@
 <link rel="stylesheet" href="song.css" />
 <style>
   /* 六朝松区块嵌进主页后，要让开固定的顶部导航 */
+  /* 窄屏上把接缝天光收短，避免压住顶部小标题 */
+  @media (max-width:1180px){
+    #intro .seam{ height:6vh !important; }
+  }
+  /* 接缝层 z-index:1 会盖住文字，把内容层提到它上面 */
+  #intro .intro-grid, #intro .skip{ position:relative; z-index:2; }
+  /* 窄屏原本把整排导航隐藏了，导致进不去文物古建。
+     改成：收起站名文字，只留印章，把四个链接放出来。 */
+  @media (max-width:720px){
+    .nav-links{ display:flex; gap:11px; }
+    .nav-links a{ font-size:11.5px; letter-spacing:.01em; padding:4px 0; }
+    .nav .brand{ font-size:0; gap:9px; }
+    .nav .brand .seal{ font-size:13px; }
+  }
+  /* 手机端：按视口高度整体缩放六朝松首屏，避免装不下产生内部滚动 */
+  @media (max-width:1180px) and (max-height:820px){
+    #intro .intro-grid, #intro .skip{ zoom:.95 }
+  }
+  @media (max-width:1180px) and (max-height:740px){
+    #intro .intro-grid, #intro .skip{ zoom:.86 }
+  }
+  /* 缩放后小标题会变得又细又淡，把字号补回来 */
+  @media (max-width:1180px) and (max-height:740px){
+    #intro .eyebrow{ font-size:14.5px; letter-spacing:.15em; }
+  }
+  @media (max-width:1180px) and (max-height:680px){
+    #intro .intro-grid, #intro .skip{ zoom:.82 }
+  }
+  @media (max-width:1180px) and (max-height:640px){
+    #intro .intro-grid, #intro .skip{ zoom:.77 }
+  }
   #song .topbar{padding-top:88px}
   #song .intro-grid{padding-top:64px}
   /* 让这一屏滚动到位时更“整” */

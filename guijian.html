@@ -431,8 +431,12 @@ button{font:inherit}
   /* 中文标题不需要那么大的字距 */
   .hero-kicker{ letter-spacing:.14em; }
   .bio, .plate-item, .sb-hint{ letter-spacing:.01em; }
+  /* 窄屏不要隐藏返回链接，否则进了页面就出不来 */
   @media (max-width:640px){
-    .top .back-site{ display:none; }
+    .top .back-site{ display:inline-block; font-size:11.5px; }
+    .top .name{ font-size:15px; }
+    .top nav{ gap:12px; }
+    .top nav a{ font-size:12px; }
   }
   /* 锚点跳转时避开固定页头 */
   #sketchbook, #about, #plates{ scroll-margin-top:140px; }
